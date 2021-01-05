@@ -20,34 +20,38 @@ try:
     # Initiate a connection with the IoT Hub
     client = client_init()
     
-    while True:
-        # Get sensor data
-        temp = round(sense.temperature)
-        humidity = round(sense.humidity)
-        
-        # Create a formatted Message
-        msg_txt_string = MSG_TXT.format(temperature=temp, humidity=humidity)
-        message = Message(msg_txt_string)
-        
-        # Verify whether alert levels have been breached
-        # TODO would be better to implement this in the message routing in IoT Hub but can't due to bug
-        if temp > 35:
-            message.custom_properties["temperatureAlert"] = "true"
-        else:
-            message.custom_properties["temperatureAlert"] = "false"
+    # Ensure the client connected
+    if client == None:
+        print("Couldn't connect to the IoT Hub")
+    else:
+        while True:
+            # Get sensor data
+            temp = round(sense.temperature)
+            humidity = round(sense.humidity)
             
-        if humidity > 75 or humidity < 20:
-            message.custom_properties["humidityAlert"] = "true"
-        else:
-            message.custom_properties["humidityAlert"] = "false"
-        
-        # Send the message to the IoT Hub
-        print("%s Submitting Data -" %datetime.now())
-        print("{}".format(message))
-        client.send_message(message)
-        
-        # Wait for 5 seconds before looping
-        time.sleep(5)
+            # Create a formatted Message
+            msg_txt_string = MSG_TXT.format(temperature=temp, humidity=humidity)
+            message = Message(msg_txt_string)
+            
+            # Verify whether alert levels have been breached
+            # TODO would be better to implement this in the message routing in IoT Hub but can't due to bug
+            if temp > 35:
+                message.custom_properties["temperatureAlert"] = "true"
+            else:
+                message.custom_properties["temperatureAlert"] = "false"
+                
+            if humidity > 75 or humidity < 20:
+                message.custom_properties["humidityAlert"] = "true"
+            else:
+                message.custom_properties["humidityAlert"] = "false"
+            
+            # Send the message to the IoT Hub
+            print("%s Submitting Data -" %datetime.now())
+            print("{}".format(message))
+            client.send_message(message)
+            
+            # Wait for 5 seconds before looping
+            time.sleep(5)
     
 except KeyboardInterrupt:
     print("Cancelled")
